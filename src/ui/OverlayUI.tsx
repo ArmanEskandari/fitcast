@@ -1,4 +1,5 @@
 import './ui.css';
+import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { LocationBar } from './LocationBar';
 import { LanguagePicker } from './LanguagePicker';
@@ -6,6 +7,8 @@ import { WeatherReadout } from './WeatherReadout';
 import { AdviceCard } from './AdviceCard';
 import { Assistant } from './Assistant';
 import { DevWeatherCycler } from './DevWeatherCycler';
+import { useDrawerGesture } from './useDrawerGesture';
+import { useKeyboardInset } from './useKeyboardInset';
 
 const DEV = process.env.NODE_ENV !== 'production';
 
@@ -16,27 +19,64 @@ const DEV = process.env.NODE_ENV !== 'production';
  */
 export const OverlayUI = () => {
   const { status, weather, error } = useAppStore();
+  // Mobile only: the bottom card opens as a compact peek (temp + garment chips)
+  // and expands to full detail — swipe up/down or tap the handle — so it never
+  // buries the scene. Ignored on desktop, where `.dock` is display:contents and
+  // everything shows at once.
+  const [expanded, setExpanded] = useState(false);
+  const drag = useDrawerGesture(setExpanded, () => setExpanded((v) => !v));
+  const dockRef = useRef<HTMLDivElement>(null);
+  useKeyboardInset();
+
+  // Collapse the expanded card when tapping anywhere outside it (mobile). The
+  // effect only runs while expanded, which only happens on mobile (the handle
+  // is hidden on desktop, where the card always shows everything).
+  useEffect(() => {
+    if (!expanded) return;
+    const onDown = (e: PointerEvent) => {
+      if (dockRef.current && !dockRef.current.contains(e.target as Node)) {
+        setExpanded(false);
+      }
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [expanded]);
 
   return (
     <div className="ui-root">
       <div className="topbar">
-        <div className="topbar-left">
-          <LocationBar />
-          <LanguagePicker />
-        </div>
-        {weather && <WeatherReadout weather={weather} />}
+        <LocationBar />
+        <LanguagePicker />
       </div>
 
-      {weather ? (
-        <AdviceCard weather={weather} />
-      ) : status === 'error' ? (
-        <div className="status glass err">{error}</div>
-      ) : status === 'loading' || status === 'locating' ? (
-        <div className="status glass">
-          <span className="spinner" />
-          {status === 'locating' ? 'Finding you…' : 'Loading weather…'}
-        </div>
-      ) : null}
+      {/* Readout + advice. On desktop `.dock` is display:contents so each child
+          stays corner-anchored; on mobile it's one card docked to the top. */}
+      <div ref={dockRef} className={`dock${expanded ? ' dock-open' : ''}`}>
+        {weather && (
+          <button
+            type="button"
+            className="dock-handle"
+            aria-expanded={expanded}
+            aria-label={expanded ? 'Hide forecast details' : 'Show forecast details'}
+            {...drag}
+          >
+            <span className="dock-grip" aria-hidden />
+          </button>
+        )}
+
+        {weather && <WeatherReadout weather={weather} />}
+
+        {weather ? (
+          <AdviceCard weather={weather} />
+        ) : status === 'error' ? (
+          <div className="status glass err">{error}</div>
+        ) : status === 'loading' || status === 'locating' ? (
+          <div className="status glass">
+            <span className="spinner" />
+            {status === 'locating' ? 'Finding you…' : 'Loading weather…'}
+          </div>
+        ) : null}
+      </div>
 
       <Assistant />
       {DEV && <DevWeatherCycler />}

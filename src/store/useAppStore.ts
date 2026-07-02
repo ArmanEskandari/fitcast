@@ -16,15 +16,19 @@ interface AppState {
   loadByLocation: (location: GeoLocation) => Promise<void>;
   /** Geocode a place name (first match) then fetch its weather. */
   loadByCity: (query: string) => Promise<void>;
-  /** Ask the browser for the current position, then fetch its weather. */
-  loadMyLocation: () => Promise<void>;
+  /**
+   * Ask the browser for the current position, then fetch its weather. If
+   * geolocation is denied/unavailable and a `fallbackCity` is given, quietly
+   * load that instead of surfacing an error (used for the initial load).
+   */
+  loadMyLocation: (fallbackCity?: string) => Promise<void>;
 }
 
 function toMessage(e: unknown): string {
   return e instanceof Error ? e.message : 'Something went wrong.';
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   status: 'idle',
   weather: null,
   location: null,
@@ -55,7 +59,7 @@ export const useAppStore = create<AppState>((set) => ({
     }
   },
 
-  loadMyLocation: async () => {
+  loadMyLocation: async (fallbackCity?: string) => {
     set({ status: 'locating', error: null });
     try {
       const { lat, lon } = await getCurrentPosition();
@@ -66,6 +70,12 @@ export const useAppStore = create<AppState>((set) => ({
       const weather = await fetchWeather(location);
       set({ status: 'ready', weather });
     } catch (e) {
+      // Geolocation denied/unavailable is a normal outcome, not an error: on
+      // the initial load we fall back to a default city rather than a red state.
+      if (fallbackCity) {
+        await get().loadByCity(fallbackCity);
+        return;
+      }
       set({ status: 'error', error: toMessage(e) });
     }
   },

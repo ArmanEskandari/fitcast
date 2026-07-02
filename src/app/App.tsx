@@ -16,10 +16,11 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
 }
 
 const App = () => {
-  // Load a default location on first mount so the scene reacts to real weather.
+  // On first mount, open on the user's own location. If they deny geolocation
+  // (or it's unavailable), quietly fall back to a default city.
   useEffect(() => {
     if (useAppStore.getState().status === 'idle') {
-      void useAppStore.getState().loadByCity('London');
+      void useAppStore.getState().loadMyLocation('London');
     }
   }, []);
 

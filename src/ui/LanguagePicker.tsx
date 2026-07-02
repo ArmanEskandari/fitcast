@@ -7,8 +7,15 @@ export const LanguagePicker = () => {
 
   return (
     <label className="lang glass" title="Response language">
-      <span aria-hidden>🌐</span>
+      <span className="lang-globe" aria-hidden>
+        🌐
+      </span>
+      {/* Compact code (e.g. EN) shown on mobile in place of the full name. */}
+      <span className="lang-code" aria-hidden>
+        {language.toUpperCase()}
+      </span>
       <select
+        className="lang-select"
         value={language}
         onChange={(e) => setLanguage(e.target.value as Language)}
         aria-label="Response language"
