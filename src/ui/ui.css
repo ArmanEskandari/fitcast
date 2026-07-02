@@ -6,533 +6,802 @@
 --------------------------------------------------------------------------- */
 
 .ui-root {
-  --pad: 24px; /* page inset */
-  --gap: 10px; /* gap between sibling controls */
-  --r-panel: 18px; /* large surfaces */
-  --r-ctrl: 14px; /* interactive controls */
-  --r-pill: 999px; /* chips / FAB */
-  --ctrl-h: 48px; /* top-bar control height */
+    --pad: 24px; /* page inset */
+    --gap: 10px; /* gap between sibling controls */
+    --r-panel: 18px; /* large surfaces */
+    --r-ctrl: 14px; /* interactive controls */
+    --r-pill: 999px; /* chips / FAB */
+    --ctrl-h: 48px; /* top-bar control height */
 
-  --glass-bg: rgba(14, 20, 32, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.32);
-  --hover: rgba(255, 255, 255, 0.1);
+    /* Page insets that also clear the notch / home indicator on mobile. On
+       desktop the env() values are 0, so these collapse to plain --pad. */
+    --safe-t: max(var(--pad), env(safe-area-inset-top));
+    --safe-r: max(var(--pad), env(safe-area-inset-right));
+    --safe-b: max(var(--pad), env(safe-area-inset-bottom));
+    --safe-l: max(var(--pad), env(safe-area-inset-left));
 
-  --text: #eef3fb;
-  --muted: rgba(238, 243, 251, 0.6);
-  --accent: #5aa2ff;
+    --glass-bg: rgba(14, 20, 32, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.32);
+    --hover: rgba(255, 255, 255, 0.1);
 
-  position: fixed;
-  inset: 0;
-  pointer-events: none; /* the canvas keeps pointer events; panels opt back in */
-  z-index: 10;
-  font-family:
-    'Inter',
+    --text: #eef3fb;
+    --muted: rgba(238, 243, 251, 0.6);
+    --accent: #5aa2ff;
+
+    position: fixed;
+    inset: 0;
+    pointer-events: none; /* the canvas keeps pointer events; panels opt back in */
+    z-index: 10;
+    font-family: 'Inter',
     system-ui,
     -apple-system,
     'Segoe UI',
     sans-serif;
-  color: var(--text);
+    color: var(--text);
 }
 
 .ui-root button,
 .ui-root input,
 .ui-root select {
-  pointer-events: auto;
-  font: inherit;
-  color: inherit;
+    pointer-events: auto;
+    font: inherit;
+    color: inherit;
 }
 
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-panel);
-  box-shadow: var(--glass-shadow);
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-panel);
+    box-shadow: var(--glass-shadow);
 }
 
-/* ---- Top bar: controls (left) + temperature (right) --------------------- */
+/* ---- Top bar: location search + language -------------------------------- */
 .topbar {
-  position: absolute;
-  top: var(--pad);
-  left: var(--pad);
-  right: var(--pad);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--gap);
-  flex-wrap: wrap; /* readout drops below the controls when space is tight */
-}
-
-.topbar-left {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--gap);
-  min-width: 0;
+    position: absolute;
+    top: var(--safe-t);
+    left: var(--safe-l);
+    right: var(--safe-r);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap);
+    min-width: 0;
 }
 
 /* Shared top-bar control shape (location + language) */
 .location,
 .lang {
-  pointer-events: auto;
-  height: var(--ctrl-h);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: var(--r-ctrl);
+    pointer-events: auto;
+    height: var(--ctrl-h);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: var(--r-ctrl);
 }
 
 .location {
-  position: relative;
-  padding: 0 8px 0 14px;
-  width: clamp(220px, 26vw, 300px);
+    position: relative;
+    padding: 0 8px 0 14px;
+    width: clamp(220px, 26vw, 300px);
 }
 
 .location form {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
 }
 
 .location .pin {
-  opacity: 0.75;
+    opacity: 0.75;
 }
 
 .location input {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .location input::placeholder {
-  color: var(--muted);
+    color: var(--muted);
 }
 
 /* Language picker */
 .lang {
-  padding: 0 12px;
+    padding: 0 12px;
 }
+
 .lang select {
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
 }
+
 .lang select option {
-  color: #0b1220;
+    color: #0b1220;
+}
+
+/* The short code (EN/DE/…) only appears on mobile; see the phone media query. */
+.lang-code {
+    display: none;
 }
 
 /* Search suggestions dropdown */
 .location-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  margin: 0;
-  padding: 6px;
-  list-style: none;
-  max-height: 280px;
-  overflow-y: auto;
-  z-index: 20;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 20;
 }
 
 .location-item {
-  padding: 9px 10px;
-  border-radius: 10px;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    padding: 9px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 .location-item.active {
-  background: var(--hover);
+    background: var(--hover);
 }
 
 /* Small round buttons (geolocate, send, close) */
 .icon-btn {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--glass-border);
-  background: rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: background 0.15s ease,
     transform 0.1s ease;
-  font-size: 15px;
-}
-.icon-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-.icon-btn:active {
-  transform: scale(0.94);
-}
-.icon-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
+    font-size: 15px;
 }
 
-/* Temperature readout */
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.icon-btn:active {
+    transform: scale(0.94);
+}
+
+.icon-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* ---- Dock: groups the readout + advice ---------------------------------- */
+/* On desktop it adds no box of its own — children self-anchor to the corners.
+   The mobile media query turns it into a single bottom card. */
+.dock {
+    display: contents;
+}
+
+/* The grab handle is a mobile-only affordance (see the phone media query). */
+.dock-handle {
+    display: none;
+}
+
+/* Wrapper for content that collapses away in the mobile peek. On desktop it's
+   inert (display:contents), so the wrapped content lays out normally. */
+.collapsible {
+    display: contents;
+}
+
+/* Temperature readout (top-right on desktop) */
 .readout {
-  text-align: right;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-  flex: none;
+    position: absolute;
+    top: var(--safe-t);
+    right: var(--safe-r);
+    text-align: right;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
 }
+
 .readout .temp {
-  font-size: 60px;
-  font-weight: 250;
-  line-height: 0.95;
-  letter-spacing: -2px;
+    font-size: 60px;
+    font-weight: 250;
+    line-height: 0.95;
+    letter-spacing: -2px;
 }
+
 .readout .temp sup {
-  font-size: 24px;
-  font-weight: 300;
-  vertical-align: top;
-  top: 0.4em;
+    font-size: 24px;
+    font-weight: 300;
+    vertical-align: top;
+    top: 0.4em;
 }
+
 .readout .cond {
-  font-size: 15px;
-  font-weight: 600;
-  text-transform: capitalize;
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: capitalize;
 }
+
 .readout .feels {
-  font-size: 13px;
-  color: var(--muted);
+    font-size: 13px;
+    color: var(--muted);
 }
+
 .readout .details {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-  max-width: 320px;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    max-width: 320px;
 }
+
 .readout .stat {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 9px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px solid var(--glass-border);
-  font-size: 12px;
-  font-weight: 500;
-  text-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid var(--glass-border);
+    font-size: 12px;
+    font-weight: 500;
+    text-shadow: none;
 }
+
 .readout .stat-alert {
-  background: rgba(255, 150, 60, 0.22);
-  border-color: rgba(255, 170, 80, 0.5);
-  color: #ffd9a8;
+    background: rgba(255, 150, 60, 0.22);
+    border-color: rgba(255, 170, 80, 0.5);
+    color: #ffd9a8;
 }
+
 .readout .uv-hint {
-  margin-top: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #ffcf8a;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffcf8a;
 }
 
 /* ---- Bottom-left: advice card ------------------------------------------- */
 .advice {
-  position: absolute;
-  left: var(--pad);
-  bottom: var(--pad);
-  width: clamp(280px, 32vw, 420px);
-  pointer-events: auto;
-  padding: 18px 20px;
+    position: absolute;
+    left: var(--safe-l);
+    bottom: var(--safe-b);
+    width: clamp(280px, 32vw, 420px);
+    pointer-events: auto;
+    padding: 18px 20px;
 }
 
 .advice .story {
-  font-size: 17px;
-  line-height: 1.5;
-  font-weight: 450;
-  margin: 0 0 14px;
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 450;
+    margin: 0 0 14px;
 }
 
 .ai-badge {
-  margin-inline-start: 6px;
-  font-size: 12px;
-  color: var(--accent);
-  opacity: 0.9;
-  vertical-align: 2px;
+    margin-inline-start: 6px;
+    font-size: 12px;
+    color: var(--accent);
+    opacity: 0.9;
+    vertical-align: 2px;
 }
 
 .chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px 6px 10px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px solid var(--glass-border);
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 6px 10px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid var(--glass-border);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
 }
+
 .chip .e {
-  font-size: 15px;
+    font-size: 15px;
 }
 
 /* ---- Status (loading / error) — shares the advice slot ------------------ */
 .status {
-  position: absolute;
-  left: var(--pad);
-  bottom: var(--pad);
-  pointer-events: auto;
-  padding: 14px 20px;
-  font-size: 14px;
-  font-weight: 500;
+    position: absolute;
+    left: var(--safe-l);
+    bottom: var(--safe-b);
+    pointer-events: auto;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 500;
 }
+
 .status.err {
-  color: #ffb4b4;
+    color: #ffb4b4;
 }
 
 .spinner {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-inline-end: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  vertical-align: -2px;
-  animation: spin 0.8s linear infinite;
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-inline-end: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: spin 0.8s linear infinite;
 }
+
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ---- Bottom-right: assistant -------------------------------------------- */
 .assistant-fab {
-  position: absolute;
-  right: var(--pad);
-  bottom: var(--pad);
-  pointer-events: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 18px;
-  height: var(--ctrl-h);
-  border-radius: var(--r-pill);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
+    position: absolute;
+    right: var(--safe-r);
+    bottom: var(--safe-b);
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px;
+    height: var(--ctrl-h);
+    border-radius: var(--r-pill);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease,
     transform 0.1s ease;
 }
+
 .assistant-fab:hover {
-  background: rgba(30, 40, 58, 0.7);
+    background: rgba(30, 40, 58, 0.7);
 }
+
 .assistant-fab:active {
-  transform: scale(0.97);
+    transform: scale(0.97);
 }
 
 .assistant {
-  position: absolute;
-  right: var(--pad);
-  bottom: var(--pad);
-  width: 360px;
-  height: min(460px, 68vh);
-  pointer-events: auto;
-  display: flex;
-  flex-direction: column;
-  padding: 14px;
+    position: absolute;
+    right: var(--safe-r);
+    bottom: var(--safe-b);
+    width: 360px;
+    height: min(460px, 68vh);
+    pointer-events: auto;
+    z-index: 40; /* above the dev cycler (30) */
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
 }
 
 .assistant-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 15px;
 }
 
 .assistant-log {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-right: 4px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
 }
 
 .msg {
-  max-width: 85%;
-  padding: 9px 12px;
-  border-radius: var(--r-ctrl);
-  font-size: 14px;
-  line-height: 1.45;
-  white-space: pre-wrap;
+    max-width: 85%;
+    padding: 9px 12px;
+    border-radius: var(--r-ctrl);
+    font-size: 14px;
+    line-height: 1.45;
+    white-space: pre-wrap;
 }
+
 .msg.bot {
-  align-self: flex-start;
-  background: rgba(255, 255, 255, 0.09);
-  border-bottom-left-radius: 4px;
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.09);
+    border-bottom-left-radius: 4px;
 }
+
 .msg.me {
-  align-self: flex-end;
-  background: var(--accent);
-  color: #04122b;
-  font-weight: 500;
-  border-bottom-right-radius: 4px;
+    align-self: flex-end;
+    background: var(--accent);
+    color: #04122b;
+    font-weight: 500;
+    border-bottom-right-radius: 4px;
 }
+
 .msg.typing {
-  opacity: 0.6;
-  font-style: italic;
+    opacity: 0.6;
+    font-style: italic;
 }
+
 .msg.note {
-  align-self: stretch;
-  max-width: 100%;
-  background: rgba(255, 200, 120, 0.12);
-  border: 1px solid rgba(255, 200, 120, 0.28);
-  font-size: 13px;
-  color: rgba(255, 226, 184, 0.95);
+    align-self: stretch;
+    max-width: 100%;
+    background: rgba(255, 200, 120, 0.12);
+    border: 1px solid rgba(255, 200, 120, 0.28);
+    font-size: 13px;
+    color: rgba(255, 226, 184, 0.95);
 }
 
 .assistant-input {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
 }
+
 .assistant-input input {
-  flex: 1;
-  min-width: 0;
-  padding: 9px 12px;
-  border-radius: var(--r-ctrl);
-  border: 1px solid var(--glass-border);
-  background: rgba(255, 255, 255, 0.06);
-  outline: none;
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border-radius: var(--r-ctrl);
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.06);
+    outline: none;
 }
+
 .assistant-input input:focus {
-  border-color: rgba(90, 162, 255, 0.6);
+    border-color: rgba(90, 162, 255, 0.6);
 }
+
 .assistant-input input::placeholder {
-  color: var(--muted);
+    color: var(--muted);
 }
 
 /* ---- Dev weather cycler (dev only) -------------------------------------- */
 .dev-cycler {
-  position: absolute;
-  top: calc(var(--pad) + 58px); /* sit below the top control row */
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  z-index: 30;
+    position: absolute;
+    top: calc(var(--pad) + 58px); /* sit below the top control row */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 30;
 }
+
 .dev-bar {
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
 }
+
 .dev-tag {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #ffcf8a;
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: rgba(255, 170, 80, 0.16);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffcf8a;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(255, 170, 80, 0.16);
 }
+
 .dev-label {
-  padding: 4px 10px;
-  border-radius: var(--r-ctrl);
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
+    padding: 4px 10px;
+    border-radius: var(--r-ctrl);
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
 }
+
 .dev-grid {
-  pointer-events: auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
-  padding: 8px;
-  max-height: 60vh;
-  overflow-y: auto;
+    pointer-events: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    padding: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
 }
+
 .dev-item {
-  padding: 7px 12px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 12.5px;
-  cursor: pointer;
-  white-space: nowrap;
-  text-align: left;
+    padding: 7px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 12.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: left;
 }
+
 .dev-item:hover {
-  background: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.14);
 }
+
 .dev-item.active {
-  border-color: rgba(90, 162, 255, 0.7);
-  background: rgba(90, 162, 255, 0.18);
+    border-color: rgba(90, 162, 255, 0.7);
+    background: rgba(90, 162, 255, 0.18);
 }
 
-/* ---- Responsive --------------------------------------------------------- */
+/* ---- Responsive: phones ------------------------------------------------- */
+/* The mascot is the hero. On phones the overview card docks full-width to the
+   TOP (collapsible peek → swipe down for detail), and the search + language
+   controls move to a thumb-friendly row at the BOTTOM, beside the Ask Sprout
+   FAB. Everything clears the safe areas. */
 @media (max-width: 720px) {
-  .ui-root {
-    --pad: 14px;
-  }
+    .ui-root {
+        --pad: 16px;
+        --fab: var(--ctrl-h); /* FAB matches the control-row height so they align */
+    }
 
-  /* Stack: controls row, then the readout right-aligned below it. */
-  .topbar-left {
-    flex: 1 1 100%;
-  }
-  .location {
-    flex: 1;
-    width: auto;
-  }
-  .readout {
-    margin-left: auto;
-  }
-  .readout .temp {
-    font-size: 44px;
-  }
+    /* ---- Controls row: docked to the bottom, left of the FAB -------------- */
+    /* --kb lifts the row above the on-screen keyboard when the search is focused
+       (see useKeyboardInset); it's 0 when no keyboard is shown. */
+    .topbar {
+        top: auto;
+        bottom: calc(var(--safe-b) + var(--kb, 0px));
+        left: var(--safe-l);
+        right: calc(var(--safe-r) + var(--fab) + 10px);
+        align-items: center;
+        gap: 8px;
+        transition: bottom 0.18s ease;
+    }
 
-  /* Advice spans the width, sitting above the assistant FAB row. */
-  .advice,
-  .status {
-    left: var(--pad);
-    right: var(--pad);
-    width: auto;
-    bottom: calc(var(--pad) + var(--ctrl-h) + 10px);
-  }
+    .location {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+    }
 
-  /* Assistant becomes a near-opaque full sheet when open. */
-  .assistant {
-    left: var(--pad);
-    right: var(--pad);
-    top: var(--pad);
-    width: auto;
-    height: auto;
-    background: rgba(10, 15, 25, 0.92);
-  }
+    /* Input is now at the bottom, so the suggestions open upward. */
+    .location-menu {
+        top: auto;
+        bottom: calc(100% + 8px);
+    }
+
+    /* Language: just the short code (EN/DE/…). Hide the globe and the full name;
+       the transparent select overlays the chip and still opens the native list. */
+    .lang {
+        flex: none;
+        position: relative;
+        padding: 0 14px;
+    }
+
+    .lang .lang-globe {
+        display: none;
+    }
+
+    .lang .lang-code {
+        display: inline;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .lang .lang-select {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    /* ---- Overview card: full-width, docked to the top -------------------- */
+    .dock {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: absolute;
+        top: var(--safe-t);
+        left: var(--safe-l);
+        right: var(--safe-r);
+        /* Collapsed: sized to the peek content. Expanded: capped, scrolls. */
+        max-height: 42vh;
+        overflow-y: auto;
+        /* Extra bottom padding leaves room for the handle at the card's foot. */
+        padding: 16px 16px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--r-panel);
+        box-shadow: var(--glass-shadow);
+        pointer-events: auto;
+    }
+
+    .dock.dock-open {
+        max-height: 78vh;
+    }
+
+    /* Grab handle sits at the card's bottom edge — pull down to reveal detail.
+       touch-action:none keeps the vertical swipe from scrolling the card/page. */
+    .dock-handle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-self: stretch;
+        order: 2; /* after the readout + advice, i.e. the card's foot */
+        margin: 0 -16px -6px; /* span full width below the padding */
+        padding: 11px 0 15px;
+        border: none;
+        background: none;
+        cursor: grab;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .dock-handle:active {
+        cursor: grabbing;
+    }
+
+    .dock-grip {
+        width: 44px;
+        height: 5px;
+        border-radius: var(--r-pill);
+        background: rgba(255, 255, 255, 0.35);
+        transition: background 0.15s ease;
+    }
+
+    .dock-handle:hover .dock-grip,
+    .dock-handle:active .dock-grip {
+        background: rgba(255, 255, 255, 0.55);
+    }
+
+    /* Sections live inside the card now — drop their own glass boxes. */
+    .dock .readout,
+    .dock .advice,
+    .dock .status {
+        position: static;
+        width: auto;
+        max-width: none;
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-radius: 0;
+    }
+
+    /* Collapse/expand animation: the wrapped stats + prose grow from 0 → auto
+       height via the grid 1fr/0fr trick (smooth in modern Safari & Chrome). */
+    .collapsible {
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.32s ease,
+        opacity 0.22s ease;
+    }
+
+    .collapsible-body {
+        overflow: hidden;
+        min-height: 0;
+    }
+
+    .dock:not(.dock-open) .collapsible {
+        grid-template-rows: 0fr;
+        opacity: 0;
+    }
+
+    /* Chips ride in a single swipeable row when collapsed. */
+    .dock:not(.dock-open) .chips {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .dock:not(.dock-open) .chips::-webkit-scrollbar {
+        display: none;
+    }
+
+    .dock:not(.dock-open) .chip {
+        flex: none;
+    }
+
+    /* Divider under the readout only when the stats are showing. */
+    .dock .readout {
+        transition: padding-bottom 0.32s ease,
+        border-color 0.32s ease;
+    }
+
+    .dock:not(.dock-open) .readout {
+        padding-bottom: 0;
+        border-bottom-color: transparent;
+    }
+
+    /* Readout: big temp on the left, condition stacked beside it, stats below. */
+    .dock .readout {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        column-gap: 14px;
+        row-gap: 2px;
+        text-align: left;
+        text-shadow: none;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .readout .temp {
+        grid-row: 1 / span 2;
+        font-size: 46px;
+        letter-spacing: -1px;
+    }
+
+    .readout .temp sup {
+        font-size: 20px;
+    }
+
+    .readout .cond {
+        align-self: flex-end;
+    }
+
+    .readout .feels {
+        align-self: flex-start;
+    }
+
+    .dock .readout .collapsible {
+        grid-column: 1 / -1;
+    }
+
+    .readout .details {
+        justify-content: flex-start;
+        max-width: none;
+        margin-top: 12px;
+    }
+
+    /* Ask Sprout: a round icon FAB in the bottom-right corner, sized to match
+       the search/language controls beside it. */
+    .assistant-fab {
+        width: var(--fab);
+        height: var(--fab);
+        padding: 0;
+        justify-content: center;
+    }
+
+    .assistant-fab .fab-label {
+        display: none;
+    }
+
+    /* Assistant opens as a full sheet within the safe area. Its foot lifts with
+       the keyboard so the message input stays visible while typing. */
+    .assistant {
+        left: var(--safe-l);
+        right: var(--safe-r);
+        top: var(--safe-t);
+        bottom: calc(var(--safe-b) + var(--kb, 0px));
+        width: auto;
+        height: auto;
+        background: rgba(10, 15, 25, 0.94);
+        transition: bottom 0.18s ease;
+    }
 }

@@ -35,24 +35,29 @@ export const WeatherReadout = ({ weather }: { weather: WeatherState }) => {
       </div>
       <div className="feels">Feels like {Math.round(weather.feelsLikeC)}°</div>
 
-      <div className="details">
-        <span className="stat" title="Wind">
-          💨 {Math.round(weather.windKph)} km/h
-        </span>
-        <span className="stat" title="Humidity">
-          💧 {Math.round(weather.humidity)}%
-        </span>
-        {weather.precipMm > 0 && (
-          <span className="stat" title="Precipitation">
-            🌧️ {weather.precipMm} mm
-          </span>
-        )}
-        <span className={`stat ${uvHigh ? 'stat-alert' : ''}`} title="UV index">
-          ☀️ UV {Math.round(weather.uvIndex)} · {uvLevel(weather.uvIndex)}
-        </span>
-      </div>
+      {/* Stats + UV hint collapse away in the mobile peek (see .collapsible). */}
+      <div className="collapsible">
+        <div className="collapsible-body">
+          <div className="details">
+            <span className="stat" title="Wind">
+              💨 {Math.round(weather.windKph)} km/h
+            </span>
+            <span className="stat" title="Humidity">
+              💧 {Math.round(weather.humidity)}%
+            </span>
+            {weather.precipMm > 0 && (
+              <span className="stat" title="Precipitation">
+                🌧️ {weather.precipMm} mm
+              </span>
+            )}
+            <span className={`stat ${uvHigh ? 'stat-alert' : ''}`} title="UV index">
+              ☀️ UV {Math.round(weather.uvIndex)} · {uvLevel(weather.uvIndex)}
+            </span>
+          </div>
 
-      {uvHigh && <div className="uv-hint">🕶️ High UV — wear sunglasses</div>}
+          {uvHigh && <div className="uv-hint">🕶️ High UV — wear sunglasses</div>}
+        </div>
+      </div>
     </div>
   );
 };

@@ -52,8 +52,25 @@ export const Assistant = () => {
 
   if (!open) {
     return (
-      <button className="assistant-fab glass" onClick={() => setOpen(true)}>
-        <span aria-hidden>💬</span> Ask Sprout
+      <button
+        className="assistant-fab glass"
+        onClick={() => setOpen(true)}
+        aria-label="Ask Sprout"
+      >
+        <svg className="fab-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+          <path
+            d="M6 3h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-7l-4 3.5V17H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12 6.8l1.03 2.17L15.2 10l-2.17 1.03L12 13.2l-1.03-2.17L8.8 10l2.17-1.03z"
+            fill="currentColor"
+          />
+        </svg>
+        <span className="fab-label">Ask Sprout</span>
       </button>
     );
   }

@@ -7,6 +7,13 @@ const srcDir = fileURLToPath(new URL('./src', import.meta.url));
 // Docs: https://rsbuild.rs/config/
 export default defineConfig({
   plugins: [pluginReact()],
+  html: {
+    // viewport-fit=cover lets the UI extend under the notch/home indicator so
+    // `env(safe-area-inset-*)` reports real values on mobile.
+    meta: {
+      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
+    },
+  },
   resolve: {
     alias: {
       '@': srcDir,

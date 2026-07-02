@@ -12,14 +12,19 @@ export const AdviceCard = ({ weather }: { weather: WeatherState }) => {
 
   return (
     <div className="advice glass">
-      <p className="story" dir="auto">
-        {story}
-        {aiGenerated && (
-          <span className="ai-badge" title="Written by AI">
-            ✦
-          </span>
-        )}
-      </p>
+      {/* The prose collapses away in the mobile peek (see .collapsible). */}
+      <div className="collapsible">
+        <div className="collapsible-body">
+          <p className="story" dir="auto">
+            {story}
+            {aiGenerated && (
+              <span className="ai-badge" title="Written by AI">
+                ✦
+              </span>
+            )}
+          </p>
+        </div>
+      </div>
       <div className="chips">
         {garments.map((g) => {
           const d = GARMENT_DISPLAY[g];
