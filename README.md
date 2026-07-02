@@ -42,19 +42,19 @@ compass to pick your own.
 
 ## Scripts
 
-| Script               | What it does                                      |
-| -------------------- | ------------------------------------------------- |
-| `pnpm dev`           | Start the Rsbuild dev server                      |
-| `pnpm build`         | Production build → `dist/`                        |
-| `pnpm preview`       | Serve the production build locally                |
-| `pnpm test`          | Run the Vitest suite (pure domain logic)          |
-| `pnpm test:watch`    | Vitest in watch mode                              |
-| `pnpm typecheck`     | `tsc --noEmit`                                    |
-| `pnpm lint`          | ESLint                                            |
-| `pnpm lint:fix`      | ESLint with autofix                               |
-| `pnpm format`        | Prettier write                                    |
-| `pnpm format:check`  | Prettier check                                    |
-| `pnpm dev:api`       | Local server for the `api/` AI functions (see below) |
+| Script              | What it does                                         |
+| ------------------- | ---------------------------------------------------- |
+| `pnpm dev`          | Start the Rsbuild dev server                         |
+| `pnpm build`        | Production build → `dist/`                           |
+| `pnpm preview`      | Serve the production build locally                   |
+| `pnpm test`         | Run the Vitest suite (pure domain logic)             |
+| `pnpm test:watch`   | Vitest in watch mode                                 |
+| `pnpm typecheck`    | `tsc --noEmit`                                       |
+| `pnpm lint`         | ESLint                                               |
+| `pnpm lint:fix`     | ESLint with autofix                                  |
+| `pnpm format`       | Prettier write                                       |
+| `pnpm format:check` | Prettier check                                       |
+| `pnpm dev:api`      | Local server for the `api/` AI functions (see below) |
 
 ## Enabling AI (optional)
 
