@@ -8,6 +8,11 @@
     "types": ["@rsbuild/core/types", "node"],
     "useDefineForClassFields": true,
 
+    /* path alias (resolved relative to this file under bundler resolution) */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
     /* modules */
     "moduleDetection": "force",
     "moduleResolution": "bundler",

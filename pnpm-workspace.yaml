@@ -1,0 +1,4 @@
+# esbuild ships a postinstall that links its platform binary; tsx (dev-only,
+# used by the local AI dev-api server) needs it. Allow it to build.
+allowBuilds:
+  esbuild: true
