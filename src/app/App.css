@@ -1,0 +1,26 @@
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  background: #0b1220;
+  overflow: hidden;
+}
+
+/* The 3D canvas fills the viewport; UI overlays sit above it later. */
+.app {
+  position: fixed;
+  inset: 0;
+}
+
+.app canvas {
+  display: block;
+}
