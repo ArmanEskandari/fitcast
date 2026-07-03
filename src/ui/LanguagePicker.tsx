@@ -1,31 +1,54 @@
-import { LANGUAGES, type Language, usePrefs } from '@/store/usePrefs';
+import { useEffect, useRef, useState } from 'react';
+import { usePrefs } from '@/store/usePrefs';
+import { LanguageList } from './LanguageList';
 
-/** Compact glass language selector; drives the language of AI responses. */
+/**
+ * Desktop language selector: a compact glass chip (globe + current code) that
+ * opens the shared language popup. Hidden on mobile, where language lives in
+ * the sidebar instead.
+ */
 export const LanguagePicker = () => {
   const language = usePrefs((s) => s.language);
-  const setLanguage = usePrefs((s) => s.setLanguage);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
 
   return (
-    <label className="lang glass" title="Response language">
-      <span className="lang-globe" aria-hidden>
-        🌐
-      </span>
-      {/* Compact code (e.g. EN) shown on mobile in place of the full name. */}
-      <span className="lang-code" aria-hidden>
-        {language.toUpperCase()}
-      </span>
-      <select
-        className="lang-select"
-        value={language}
-        onChange={(e) => setLanguage(e.target.value as Language)}
-        aria-label="Response language"
+    <div className="lang" ref={ref}>
+      <button
+        type="button"
+        className="lang-btn glass"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        title="Response language"
+        onClick={() => setOpen((o) => !o)}
       >
-        {LANGUAGES.map((l) => (
-          <option key={l.code} value={l.code}>
-            {l.label}
-          </option>
-        ))}
-      </select>
-    </label>
+        <span className="lang-globe" aria-hidden>
+          🌐
+        </span>
+        <span className="lang-code">{language.toUpperCase()}</span>
+      </button>
+
+      {open && (
+        <div className="menu-panel glass" role="menu">
+          <LanguageList onSelect={() => setOpen(false)} />
+        </div>
+      )}
+    </div>
   );
 };

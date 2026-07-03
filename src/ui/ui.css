@@ -11,7 +11,7 @@
     --r-panel: 18px; /* large surfaces */
     --r-ctrl: 14px; /* interactive controls */
     --r-pill: 999px; /* chips / FAB */
-    --ctrl-h: 48px; /* top-bar control height */
+    --ctrl-h: 50px; /* top-bar control height */
 
     /* Page insets that also clear the notch / home indicator on mobile. On
        desktop the env() values are 0, so these collapse to plain --pad. */
@@ -70,9 +70,9 @@
     min-width: 0;
 }
 
-/* Shared top-bar control shape (location + language) */
+/* Shared top-bar control shape (location + language chip) */
 .location,
-.lang {
+.lang-btn {
     pointer-events: auto;
     height: var(--ctrl-h);
     display: flex;
@@ -113,27 +113,143 @@
     color: var(--muted);
 }
 
-/* Language picker */
+/* Language picker: a chip that opens the shared popup (desktop). */
 .lang {
-    padding: 0 12px;
+    position: relative;
+    flex: none;
 }
 
-.lang select {
-    background: transparent;
-    border: none;
-    outline: none;
+.lang-btn {
+    padding: 0 14px;
+    cursor: pointer;
     font-size: 14px;
     font-weight: 500;
+}
+
+.lang-code {
+    letter-spacing: 0.5px;
+}
+
+/* ---- Hamburger menu (mobile only; hidden on desktop) -------------------- */
+.top-menu {
+    display: none;
+    position: relative;
+    flex: none;
+}
+
+.menu-btn {
+    pointer-events: auto;
+    display: grid;
+    place-items: center;
+    height: var(--ctrl-h);
+    width: var(--ctrl-h);
+    border-radius: var(--r-ctrl);
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text);
+}
+
+/* Desktop language popup: drops below the chip, aligned to its right edge. */
+.menu-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 190px;
+    padding: 6px;
+    z-index: 40;
+}
+
+.menu-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---- Mobile sidebar drawer ---------------------------------------------- */
+.sidebar-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 49;
+    pointer-events: auto;
+    background: rgba(0, 0, 0, 0.45);
+    animation: scrim-in 0.2s ease;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    width: min(300px, 82vw);
+    pointer-events: auto;
+    /* More opaque than the standard glass so the busy scene behind stays legible. */
+    background: rgba(11, 16, 26, 0.94);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: calc(var(--safe-t) + 6px) 14px calc(var(--safe-b) + 6px);
+    border-radius: var(--r-panel) 0 0 var(--r-panel);
+    overflow-y: auto;
+    animation: sidebar-in 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.sidebar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.sidebar-title {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+@keyframes sidebar-in {
+    from {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes scrim-in {
+    from {
+        opacity: 0;
+    }
+}
+
+.menu-section {
+    padding: 8px 10px 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 10px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
+    text-align: left;
     cursor: pointer;
 }
 
-.lang select option {
-    color: #0b1220;
+.menu-item:hover {
+    background: var(--hover);
 }
 
-/* The short code (EN/DE/…) only appears on mobile; see the phone media query. */
-.lang-code {
-    display: none;
+.menu-item.active {
+    color: var(--accent);
+    font-weight: 600;
 }
 
 /* Search suggestions dropdown */
@@ -668,6 +784,20 @@
         --fab: var(--ctrl-h); /* FAB matches the control-row height so they align */
     }
 
+    /* iOS Safari auto-zooms when a focused field is under 16px — keep inputs at
+       16px on mobile so focusing search / the assistant never zooms the page. */
+    .ui-root input,
+    .ui-root textarea,
+    .ui-root select {
+        font-size: 16px;
+    }
+
+    /* The dev-only weather cycler overlaps the top card on phones; it's a
+       desktop testing tool, so hide it here. */
+    .dev-cycler {
+        display: none;
+    }
+
     /* ---- Controls row: docked to the bottom, left of the FAB -------------- */
     /* --kb lifts the row above the on-screen keyboard when the search is focused
        (see useKeyboardInset); it's 0 when no keyboard is shown. */
@@ -693,54 +823,38 @@
         bottom: calc(100% + 8px);
     }
 
-    /* Language: just the short code (EN/DE/…). Hide the globe and the full name;
-       the transparent select overlays the chip and still opens the native list. */
+    /* Language moves into the sidebar on mobile to keep the control row clean. */
     .lang {
-        flex: none;
-        position: relative;
-        padding: 0 14px;
-    }
-
-    .lang .lang-globe {
         display: none;
     }
 
-    .lang .lang-code {
-        display: inline;
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-
-    .lang .lang-select {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
+    .top-menu {
+        display: block;
     }
 
     /* ---- Overview card: full-width, docked to the top -------------------- */
     .dock {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         position: absolute;
         top: var(--safe-t);
         left: var(--safe-l);
         right: var(--safe-r);
-        /* Collapsed: sized to the peek content. Expanded: capped, scrolls. */
-        max-height: 42vh;
+        /* Collapsed: sized to the compact peek (readout + forecast strip) so the
+           mascot stays the hero. Expanded: capped, scrolls. */
+        max-height: 30vh;
         overflow-y: auto;
+        overflow-x: hidden;
         /* Extra bottom padding leaves room for the handle at the card's foot. */
-        padding: 16px 16px;
-        background: var(--glass-bg);
+        padding: 14px 14px;
+        /* Gentle top-lit gradient + inner highlight for a premium, layered feel. */
+        background: linear-gradient(180deg, rgba(34, 46, 68, 0.66), rgba(13, 19, 31, 0.58));
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
         border: 1px solid var(--glass-border);
         border-radius: var(--r-panel);
-        box-shadow: var(--glass-shadow);
+        box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         pointer-events: auto;
     }
 
@@ -786,7 +900,8 @@
     /* Sections live inside the card now — drop their own glass boxes. */
     .dock .readout,
     .dock .advice,
-    .dock .status {
+    .dock .status,
+    .dock .timeline {
         position: static;
         width: auto;
         max-width: none;
@@ -797,6 +912,19 @@
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         border-radius: 0;
+        transform: none;
+    }
+
+    /* Timeline: a swipeable row that stays visible even in the collapsed peek,
+       with a hairline divider separating it from the readout above. */
+    .dock .timeline {
+        gap: 6px;
+        overflow-x: auto;
+    }
+
+    /* Keep segments uniform (min-width from the base rule); just tighten padding. */
+    .dock .tl-seg {
+        padding: 6px 8px;
     }
 
     /* Collapse/expand animation: the wrapped stats + prose grow from 0 → auto
@@ -818,19 +946,20 @@
         opacity: 0;
     }
 
-    /* Chips ride in a single swipeable row when collapsed. */
+    /* Keep the peek to just the forecast strip: the "Now" chip already carries
+       the current temp, so the big readout header + outfit chips reveal only on
+       expand — the collapsed card stays minimal and the mascot leads. */
     .dock:not(.dock-open) .chips {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-
-    .dock:not(.dock-open) .chips::-webkit-scrollbar {
         display: none;
     }
 
-    .dock:not(.dock-open) .chip {
-        flex: none;
+    .dock:not(.dock-open):has(.timeline) .readout {
+        display: none;
+    }
+
+    /* No divider above the strip when it's the only thing in the peek. */
+    .dock:not(.dock-open) .timeline {
+        border-top: none;
     }
 
     /* Divider under the readout only when the stats are showing. */
@@ -859,12 +988,12 @@
 
     .readout .temp {
         grid-row: 1 / span 2;
-        font-size: 46px;
+        font-size: 34px;
         letter-spacing: -1px;
     }
 
     .readout .temp sup {
-        font-size: 20px;
+        font-size: 16px;
     }
 
     .readout .cond {

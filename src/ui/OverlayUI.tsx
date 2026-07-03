@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAppStore, useDisplayWeather } from '@/store/useAppStore';
 import { LocationBar } from './LocationBar';
 import { LanguagePicker } from './LanguagePicker';
+import { Sidebar } from './Sidebar';
 import { WeatherReadout } from './WeatherReadout';
 import { ForecastTimeline } from './ForecastTimeline';
 import { AdviceCard } from './AdviceCard';
@@ -49,7 +50,9 @@ export const OverlayUI = () => {
     <div className="ui-root">
       <div className="topbar">
         <LocationBar />
+        {/* Language chip on desktop; folded into the sidebar on mobile. */}
         <LanguagePicker />
+        <Sidebar />
       </div>
 
       {/* Readout + advice. On desktop `.dock` is display:contents so each child
