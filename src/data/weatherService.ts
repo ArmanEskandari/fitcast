@@ -1,5 +1,5 @@
 import type { GeoLocation, WeatherState } from '@/domain/types';
-import { normalizeWeather, type RawForecast } from '@/domain/normalizeWeather';
+import { normalizeWeather, type RawForecast } from '../domain/normalizeWeather';
 import { createTtlCache } from './cache';
 
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
