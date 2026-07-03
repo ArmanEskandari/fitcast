@@ -5,6 +5,12 @@
    bottom-left advice, bottom-right assistant — so nothing overlaps.
 --------------------------------------------------------------------------- */
 
+/* Keyboard inset — overwritten on :root by useKeyboardInset while the on-screen
+   keyboard is open; 0 otherwise. Declared here so it always resolves. */
+:root {
+    --kb: 0px;
+}
+
 .ui-root {
     --pad: 24px; /* page inset */
     --gap: 10px; /* gap between sibling controls */
@@ -420,6 +426,8 @@
 }
 
 .tl-seg {
+    /* Temperature tint for the accent bar; overridden inline per segment. */
+    --seg-accent: #8fd3e8;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -926,6 +934,7 @@
     .dock .timeline {
         gap: 6px;
         overflow-x: auto;
+        padding: 5px 0;
     }
 
     /* Keep segments uniform (min-width from the base rule); just tighten padding. */
