@@ -9,9 +9,9 @@
  * data helpers (no React, no Three), which are Node-safe.
  */
 import Anthropic from '@anthropic-ai/sdk';
-import { searchCities } from '../src/data/geocode';
-import { fetchWeather } from '../src/data/weatherService';
-import { recommendOutfit } from '../src/domain/recommendOutfit';
+import { searchCities } from '../src/data/geocode.js';
+import { fetchWeather } from '../src/data/weatherService.js';
+import { recommendOutfit } from '../src/domain/recommendOutfit.js';
 
 const MODEL = 'claude-sonnet-5';
 

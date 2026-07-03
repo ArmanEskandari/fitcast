@@ -18,6 +18,12 @@ export default defineConfig({
     alias: {
       '@': srcDir,
     },
+    // Let explicit `.js` specifiers resolve to their `.ts` source. The `api/`
+    // serverless functions run as native Node ESM, which requires extensions
+    // on relative imports; this keeps those same imports building here too.
+    extensionAlias: {
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+    },
   },
   server: {
     // In dev, forward the serverless AI functions to the local dev-api server
