@@ -1,3 +1,4 @@
+import type { HourPoint } from '@/domain/forecastTimeline';
 import type { GeoLocation, WeatherState } from '@/domain/types';
 import {
   nearestHourIndex,
@@ -106,4 +107,47 @@ export async function fetchForecastAt(
   const offsetHours = Math.round((Date.parse(`${resolvedTime}:00`.slice(0, 19)) - targetMs) / hourMs);
 
   return { weather: normalizeHourly(hourly, index, location), resolvedTime, offsetHours };
+}
+
+/**
+ * Fetch the upcoming hours as a timeline, starting from the current local hour.
+ * Returns `hoursAhead` points (default 13, i.e. now + 12 hours) for the
+ * forecast strip. Empty array if hourly data is unavailable.
+ */
+export async function fetchTimeline(
+  location: GeoLocation,
+  hoursAhead = 13,
+  signal?: AbortSignal,
+): Promise<HourPoint[]> {
+  const params = new URLSearchParams({
+    latitude: String(location.lat),
+    longitude: String(location.lon),
+    // `current` is requested only to learn the location's current local hour.
+    current: 'temperature_2m',
+    hourly: HOURLY_FIELDS,
+    timezone: 'auto',
+    wind_speed_unit: 'kmh',
+    forecast_days: '2',
+  });
+
+  const res = await fetch(`${FORECAST_URL}?${params}`, { signal });
+  if (!res.ok) throw new Error(`Timeline fetch failed (${res.status})`);
+
+  const raw = (await res.json()) as RawForecast & { current?: { time?: string } };
+  const hourly = raw.hourly;
+  if (!hourly?.time?.length) return [];
+
+  // Match the current hour ("YYYY-MM-DDTHH") to find where "now" sits.
+  const nowKey = raw.current?.time?.slice(0, 13);
+  const start = nowKey ? Math.max(0, hourly.time.findIndex((t) => t.slice(0, 13) === nowKey)) : 0;
+
+  const points: HourPoint[] = [];
+  for (let i = start; i < hourly.time.length && points.length < hoursAhead; i++) {
+    points.push({
+      time: hourly.time[i],
+      hour: Number(hourly.time[i].slice(11, 13)),
+      weather: normalizeHourly(hourly, i, location),
+    });
+  }
+  return points;
 }

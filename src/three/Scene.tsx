@@ -4,7 +4,7 @@ import { mapToScene } from '@/domain/mapToScene';
 import { recommendOutfit } from '@/domain/recommendOutfit';
 import { FALLBACK_WEATHER } from '@/domain/defaults';
 import { MAX_DPR } from '@/lib/quality';
-import { useAppStore } from '@/store/useAppStore';
+import { useDisplayWeather } from '@/store/useAppStore';
 import { Sky } from './Sky';
 import { Fog } from './Fog';
 import { Lighting } from './Lighting';
@@ -25,7 +25,7 @@ import { Wind } from './scenery/Wind';
  * mascot arrives in M5.
  */
 export const Scene = () => {
-  const weather = useAppStore((s) => s.weather);
+  const weather = useDisplayWeather();
   const current = weather ?? FALLBACK_WEATHER;
   const scene = useMemo(() => mapToScene(current), [current]);
   const outfit = useMemo(() => recommendOutfit(current), [current]);

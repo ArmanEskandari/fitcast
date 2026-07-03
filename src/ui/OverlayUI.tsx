@@ -1,9 +1,10 @@
 import './ui.css';
 import { useEffect, useRef, useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, useDisplayWeather } from '@/store/useAppStore';
 import { LocationBar } from './LocationBar';
 import { LanguagePicker } from './LanguagePicker';
 import { WeatherReadout } from './WeatherReadout';
+import { ForecastTimeline } from './ForecastTimeline';
 import { AdviceCard } from './AdviceCard';
 import { Assistant } from './Assistant';
 import { DevWeatherCycler } from './DevWeatherCycler';
@@ -19,6 +20,8 @@ const DEV = process.env.NODE_ENV !== 'production';
  */
 export const OverlayUI = () => {
   const { status, weather, error } = useAppStore();
+  // Children render whatever segment is selected (live weather, or a forecast).
+  const display = useDisplayWeather();
   // Mobile only: the bottom card opens as a compact peek (temp + garment chips)
   // and expands to full detail — swipe up/down or tap the handle — so it never
   // buries the scene. Ignored on desktop, where `.dock` is display:contents and
@@ -64,10 +67,12 @@ export const OverlayUI = () => {
           </button>
         )}
 
-        {weather && <WeatherReadout weather={weather} />}
+        {display && <WeatherReadout weather={display} />}
 
-        {weather ? (
-          <AdviceCard weather={weather} />
+        <ForecastTimeline />
+
+        {display ? (
+          <AdviceCard weather={display} />
         ) : status === 'error' ? (
           <div className="status glass err">{error}</div>
         ) : status === 'loading' || status === 'locating' ? (

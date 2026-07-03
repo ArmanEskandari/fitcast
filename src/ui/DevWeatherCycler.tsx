@@ -79,7 +79,12 @@ export const DevWeatherCycler = () => {
   // hijack the normal auto-loaded weather on page load).
   useEffect(() => {
     if (!active) return;
-    useAppStore.setState({ status: 'ready', weather: variants[index].weather });
+    useAppStore.setState({
+      status: 'ready',
+      weather: variants[index].weather,
+      timeline: [],
+      activeSegment: 0,
+    });
   }, [index, active, variants]);
 
   useEffect(() => {
