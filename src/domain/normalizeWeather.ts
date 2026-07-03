@@ -19,7 +19,22 @@ export interface RawForecast {
   daily?: {
     uv_index_max?: number[];
   };
+  /** Hourly forecast block, requested only for future-time lookups. */
+  hourly?: {
+    /** Local wall-clock timestamps, e.g. "2026-07-06T08:00". */
+    time: string[];
+    temperature_2m: number[];
+    apparent_temperature: number[];
+    is_day: number[];
+    precipitation: number[];
+    relative_humidity_2m: number[];
+    weather_code: number[];
+    wind_speed_10m: number[];
+    uv_index?: number[];
+  };
 }
+
+type Hourly = NonNullable<RawForecast['hourly']>;
 
 /**
  * Map a WMO weather-interpretation code to our coarser {@link Condition}.
@@ -49,6 +64,49 @@ export function normalizeWeather(raw: RawForecast, location: GeoLocation): Weath
     precipMm: c.precipitation,
     humidity: c.relative_humidity_2m ?? 0,
     uvIndex: raw.daily?.uv_index_max?.[0] ?? 0,
+    location,
+  };
+}
+
+/**
+ * Parse a local wall-clock timestamp (no timezone, e.g. "2026-07-06T08:00")
+ * into ms. Both forecast times and the requested time are parsed the same way,
+ * so the server's timezone cancels out when we only compare differences.
+ */
+function parseLocal(ts: string): number {
+  return Date.parse(ts.length === 16 ? `${ts}:00` : ts);
+}
+
+/**
+ * Index of the hourly slot nearest `targetLocalIso`, or null if there's no
+ * hourly data or the target can't be parsed.
+ */
+export function nearestHourIndex(times: string[], targetLocalIso: string): number | null {
+  const target = parseLocal(targetLocalIso);
+  if (!times.length || Number.isNaN(target)) return null;
+  let best = 0;
+  let bestDiff = Infinity;
+  for (let i = 0; i < times.length; i++) {
+    const diff = Math.abs(parseLocal(times[i]) - target);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = i;
+    }
+  }
+  return best;
+}
+
+/** Build a WeatherState from the hourly forecast block at a given index. */
+export function normalizeHourly(hourly: Hourly, index: number, location: GeoLocation): WeatherState {
+  return {
+    tempC: hourly.temperature_2m[index],
+    feelsLikeC: hourly.apparent_temperature[index],
+    condition: conditionFromWmo(hourly.weather_code[index]),
+    isDay: hourly.is_day[index] === 1,
+    windKph: hourly.wind_speed_10m[index],
+    precipMm: hourly.precipitation[index],
+    humidity: hourly.relative_humidity_2m?.[index] ?? 0,
+    uvIndex: hourly.uv_index?.[index] ?? 0,
     location,
   };
 }

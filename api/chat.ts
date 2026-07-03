@@ -10,17 +10,21 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { searchCities } from '../src/data/geocode.js';
-import { fetchWeather } from '../src/data/weatherService.js';
+import { fetchForecastAt, fetchWeather } from '../src/data/weatherService.js';
 import { recommendOutfit } from '../src/domain/recommendOutfit.js';
+import type { WeatherState } from '../src/domain/types.js';
 
 const MODEL = 'claude-sonnet-5';
 
 const SYSTEM = `You are Sprout, Fitcast's friendly weather mascot. Help the user
-decide what to wear, grounded in real current weather. Before giving clothing
-advice, call the get_weather tool to look up conditions for the relevant place.
+decide what to wear, grounded in real weather. Before giving clothing advice,
+call the get_weather tool to look up conditions for the relevant place. For a
+future time (e.g. "Monday at 8am", "tomorrow afternoon"), pass the \`when\`
+argument so you get the forecast for that hour instead of current conditions.
 Keep replies warm, in-character, and concise (2-4 sentences). If the user names
-an activity (a run, a commute, a hike), tailor the advice to it. Note that you
-only have *current* conditions, not a future forecast, if that matters.`;
+an activity (a run, a commute, a hike), tailor the advice to it. Forecasts reach
+about 14 days ahead; if a request is beyond that, say so and offer current
+conditions as a rough guide.`;
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
@@ -34,11 +38,16 @@ const TOOLS = [
   {
     name: 'get_weather',
     description:
-      'Get current weather and the recommended outfit for a place. Call before giving clothing advice.',
+      'Get the weather and recommended outfit for a place. Call before giving clothing advice. Omit `when` for current conditions; pass it for a future forecast.',
     input_schema: {
       type: 'object',
       properties: {
         location: { type: 'string', description: 'City name, e.g. "London"' },
+        when: {
+          type: 'string',
+          description:
+            'Optional. Local wall-clock date-time for a future forecast, ISO 8601 without timezone, e.g. "2026-07-06T08:00". Compute it from the current date given in the system prompt (resolve "Monday", "tomorrow", etc.). Available up to ~14 days ahead. Omit for current weather.',
+        },
       },
       required: ['location'],
       additionalProperties: false,
@@ -46,11 +55,8 @@ const TOOLS = [
   },
 ];
 
-async function runTool(name: string, input: { location: string }) {
-  if (name !== 'get_weather') return { error: 'unknown tool' };
-  const [match] = await searchCities(input.location, 1);
-  if (!match) return { error: `No place found for "${input.location}".` };
-  const w = await fetchWeather(match);
+/** Shape the tool result the model sees, deriving the outfit from conditions. */
+function packWeather(w: WeatherState, extra: Record<string, unknown> = {}) {
   const outfit = recommendOutfit(w);
   return {
     location: w.location.name,
@@ -63,7 +69,32 @@ async function runTool(name: string, input: { location: string }) {
     uvIndex: w.uvIndex,
     recommended: outfit.garments,
     vibe: outfit.vibe,
+    ...extra,
   };
+}
+
+async function runTool(name: string, input: { location: string; when?: string }) {
+  if (name !== 'get_weather') return { error: 'unknown tool' };
+  const [match] = await searchCities(input.location, 1);
+  if (!match) return { error: `No place found for "${input.location}".` };
+
+  if (input.when) {
+    const forecast = await fetchForecastAt(match, input.when);
+    if (forecast) {
+      return packWeather(forecast.weather, {
+        isForecast: true,
+        forecastFor: forecast.resolvedTime,
+      });
+    }
+    // Requested time is outside the ~14-day forecast window (or unparseable):
+    // fall back to current conditions and flag it so the model can explain.
+    return packWeather(await fetchWeather(match), {
+      isForecast: false,
+      requestedTimeOutOfRange: input.when,
+    });
+  }
+
+  return packWeather(await fetchWeather(match), { isForecast: false });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,6 +116,7 @@ export default async function handler(req: any, res: any) {
     }
 
     let system = SYSTEM;
+    system += `\nThe current date and time is ${new Date().toISOString()} (UTC). Resolve relative days like "Monday" or "tomorrow" against this, and express the \`when\` argument in the place's local wall-clock time.`;
     if (defaultLocation) {
       system += `\nThe user's current location is ${defaultLocation}; use it when they don't specify one.`;
     }

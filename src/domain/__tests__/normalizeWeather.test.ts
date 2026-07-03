@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { conditionFromWmo, normalizeWeather, type RawForecast } from '@/domain/normalizeWeather';
+import {
+  conditionFromWmo,
+  nearestHourIndex,
+  normalizeHourly,
+  normalizeWeather,
+  type RawForecast,
+} from '@/domain/normalizeWeather';
 import type { Condition } from '@/domain/types';
 
 describe('conditionFromWmo', () => {
@@ -69,5 +75,62 @@ describe('normalizeWeather', () => {
     const result = normalizeWeather(noDaily, location);
     expect(result.uvIndex).toBe(0);
     expect(result.isDay).toBe(true);
+  });
+});
+
+describe('nearestHourIndex', () => {
+  const times = ['2026-07-06T06:00', '2026-07-06T07:00', '2026-07-06T08:00', '2026-07-06T09:00'];
+
+  it('finds the exact hour', () => {
+    expect(nearestHourIndex(times, '2026-07-06T08:00')).toBe(2);
+  });
+
+  it('rounds to the closest hour', () => {
+    expect(nearestHourIndex(times, '2026-07-06T08:40')).toBe(3);
+    expect(nearestHourIndex(times, '2026-07-06T08:20')).toBe(2);
+  });
+
+  it('clamps to the ends of the range', () => {
+    expect(nearestHourIndex(times, '2026-07-01T00:00')).toBe(0);
+    expect(nearestHourIndex(times, '2026-07-20T00:00')).toBe(3);
+  });
+
+  it('returns null for empty times or an unparseable target', () => {
+    expect(nearestHourIndex([], '2026-07-06T08:00')).toBeNull();
+    expect(nearestHourIndex(times, 'not-a-date')).toBeNull();
+  });
+});
+
+describe('normalizeHourly', () => {
+  const location = { name: 'Bournemouth', lat: 50.72, lon: -1.88 };
+  const hourly = {
+    time: ['2026-07-06T07:00', '2026-07-06T08:00'],
+    temperature_2m: [14, 16],
+    apparent_temperature: [13, 15],
+    is_day: [1, 1],
+    precipitation: [0, 0.2],
+    relative_humidity_2m: [80, 78],
+    weather_code: [3, 61],
+    wind_speed_10m: [10, 12],
+    uv_index: [1, 2],
+  };
+
+  it('builds a WeatherState from the given hour', () => {
+    expect(normalizeHourly(hourly, 1, location)).toEqual({
+      tempC: 16,
+      feelsLikeC: 15,
+      condition: 'rain',
+      isDay: true,
+      windKph: 12,
+      precipMm: 0.2,
+      humidity: 78,
+      uvIndex: 2,
+      location,
+    });
+  });
+
+  it('defaults uvIndex to 0 when hourly uv_index is absent', () => {
+    const { uv_index: _omit, ...noUv } = hourly;
+    expect(normalizeHourly(noUv, 0, location).uvIndex).toBe(0);
   });
 });
