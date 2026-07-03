@@ -43,6 +43,7 @@
 
 .ui-root button,
 .ui-root input,
+.ui-root textarea,
 .ui-root select {
     pointer-events: auto;
     font: inherit;
@@ -679,25 +680,30 @@
 
 .assistant-input {
     display: flex;
+    align-items: flex-end; /* keep Send pinned to the bottom as the field grows */
     gap: 8px;
     margin-top: 12px;
 }
 
-.assistant-input input {
+.assistant-input textarea {
     flex: 1;
     min-width: 0;
-    padding: 9px 12px;
+    padding: 12px 12px;
     border-radius: var(--r-ctrl);
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.06);
     outline: none;
+    resize: none;
+    line-height: 1.35;
+    max-height: 120px;
+    overflow-y: auto;
 }
 
-.assistant-input input:focus {
+.assistant-input textarea:focus {
     border-color: rgba(90, 162, 255, 0.6);
 }
 
-.assistant-input input::placeholder {
+.assistant-input textarea::placeholder {
     color: var(--muted);
 }
 

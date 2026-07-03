@@ -19,10 +19,19 @@ export const Assistant = () => {
   const location = useAppStore((s) => s.location);
   const language = usePrefs((s) => s.language);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, busy]);
+
+  // Grow the textarea with its content, up to a cap (then it scrolls).
+  useEffect(() => {
+    const ta = inputRef.current;
+    if (!ta) return;
+    ta.style.height = 'auto';
+    ta.style.height = `${Math.min(ta.scrollHeight, 120)}px`;
+  }, [input]);
 
   async function send() {
     const text = input.trim();
@@ -58,17 +67,27 @@ export const Assistant = () => {
         aria-label="Ask Sprout"
       >
         <svg className="fab-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+          {/* Friendly robot: antenna + rounded head + eyes */}
           <path
-            d="M6 3h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-7l-4 3.5V17H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"
+            d="M12 3.2V6"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.8"
-            strokeLinejoin="round"
+            strokeLinecap="round"
           />
-          <path
-            d="M12 6.8l1.03 2.17L15.2 10l-2.17 1.03L12 13.2l-1.03-2.17L8.8 10l2.17-1.03z"
-            fill="currentColor"
+          <circle cx="12" cy="2.6" r="1.3" fill="currentColor" />
+          <rect
+            x="4"
+            y="6"
+            width="16"
+            height="12"
+            rx="4.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
           />
+          <circle cx="9.2" cy="12" r="1.5" fill="currentColor" />
+          <circle cx="14.8" cy="12" r="1.5" fill="currentColor" />
         </svg>
         <span className="fab-label">Ask Sprout</span>
       </button>
@@ -109,9 +128,18 @@ export const Assistant = () => {
           void send();
         }}
       >
-        <input
+        <textarea
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            // Enter sends; Shift+Enter (and IME composition) inserts a newline.
+            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+              void send();
+            }
+          }}
+          rows={1}
           placeholder="What should I wear for…"
           aria-label="Ask the assistant"
           disabled={unavailable}
